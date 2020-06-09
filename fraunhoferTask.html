@@ -62,7 +62,7 @@
 <script>
     let type='type';
     var endpoint = "http://localhost:3030/dataset/sparql?query="
-    var querystring = 'SELECT * WHERE { ?s ?p ?o.} limit 5'
+    var querystring = 'SELECT * WHERE { ?s ?p ?o.} limit 7'
     $.ajax({
         type: 'GET',
         url: endpoint + escape(querystring),
