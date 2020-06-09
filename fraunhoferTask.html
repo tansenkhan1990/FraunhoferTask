@@ -45,7 +45,7 @@
             </div>
             <div class="modal-body">
             </div>
-            <div><pre> all graph connectvity for this subject</pre></div>
+            <div><pre>  graph connectvity for this subject</pre></div>
             <div id="mynetwork"></div>
 
 
@@ -62,7 +62,7 @@
 <script>
     let type='type';
     var endpoint = "http://localhost:3030/dataset/sparql?query="
-    var querystring = 'SELECT * WHERE { ?s ?p ?o.} limit 10'
+    var querystring = 'SELECT * WHERE { ?s ?p ?o.} limit 5'
     $.ajax({
         type: 'GET',
         url: endpoint + escape(querystring),
@@ -113,9 +113,9 @@
                      $(".modal-body").append(menu2)
                      $(".modal-body").append(menu3)
                      let indexValue=[]
-                    for(let i =0;i<maindata.length;i++)
+                    for(let i =0;i<maindata.length;++i)
                     {
-                        let a=(maindata[i]['s']['value']===subject)
+                        let a=(maindata[i]['s']['value']==subject)
                         if (a){
                             indexValue[i]={
                                 'sub':maindata[i]['s']['value'],
