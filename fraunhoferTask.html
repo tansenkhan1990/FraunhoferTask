@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+<head>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/vis/4.21.0/vis.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/vis/4.21.0/vis-network.min.css" rel="stylesheet" type="text/css" />
+    <style type="text/css">
+        #mynetwork {
+            width: 600px;
+            height: 400px;
+            border: 1px solid lightgray;
+        }
+        @media (min-width: 768px) {
+            .modal-xl {
+                width: 90%;
+                max-width:1200px;
+            }
+        }
+    </style>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css?family=Nunito:200,600" rel="stylesheet">
+</head>
+<body>
+<div class="container">
+    <h2>Data with subject Predecate and object</h2>
+    <div class="row">
+            <ul class="list-group" id="poko">
+        </ul>
+    </div>
+    </div>
+<div id="myModal" class="modal fade" role="dialog">
+    <div class="modal-dialog modal-xl">
+
+        <!-- Modal content-->
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h4 class="modal-title">Subject predicate and object</h4>
+            </div>
+            <div class="modal-body">
+            </div>
+            <div><pre> all graph connectvity for this subject</pre></div>
+            <div id="mynetwork"></div>
+
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+
+</body>
+<script>
+    let type='type';
+    var endpoint = "http://localhost:3030/dataset/sparql?query="
+    var querystring = 'SELECT * WHERE { ?s ?p ?o.} limit 10'
+    $.ajax({
+        type: 'GET',
+        url: endpoint + escape(querystring),
+        headers: {
+            Accept: 'application/sparql-results+json;charset=UTF-8'
+        },
+        success: function(data, textStatus, jqXHR) {
+            if (data){
+             let maindata=data['results']['bindings'];
+              //  let maindata2=data['results'];
+                //console.log(maindata)
+                $(maindata).each(function (index,element) {
+                    var markup =  "<li svalue= "+element['s']['value'] +" type='"+element['p']['type']+" ' pvalue="+element['p']['value']+" class='list-group-item'>"
+                        +
+                        element['s']['value']
+                        +""
+                        +"<div class='text-right'>"
+                        +
+                        "<a data-toggle='modal' id='detail' data-target='#myModal'>" +
+                        "Detail</a>"+
+                        "<div>"
+                        +"</li>";
+
+                     $("#poko").append(markup);
+
+                     // let markup2= "<li class='list-group-item'>"+
+                     //     element['s']['value'] +""
+                     //     +"<div class='text-right'>"
+                     //     +
+                     //     "<a data-toggle='modal' id='detail' data-target='#myModal'>" +
+                     //     "Details</a>"+
+                     //     "<div>"
+                     //     +"</li>";
+                     // $(".modal-body").append(markup2);
+
+                      // let markup3= "<p>"+ element['s']['value']
+                      //     +"</p>";
+                      // ("#home").append(markup3)
+                })
+                $("li").click(function() {
+                    let subject=$(this).attr('svalue')
+                    let predicate=$(this).attr('pvalue')
+                    let type=$(this).attr('type')
+                     let menu1= "<p>Subject Value for this triple:  "+ subject +"</p>";
+                     let menu2= "<p>prdeicate Value for this triple:   "+ predicate +"</p>";
+                     let menu3= "<p>predicate type for this triple:  "+ type +"</p>";
+                     $(".modal-body").append(menu1)
+                     $(".modal-body").append(menu2)
+                     $(".modal-body").append(menu3)
+                     let indexValue=[]
+                    for(let i =0;i<maindata.length;i++)
+                    {
+                        let a=(maindata[i]['s']['value']===subject)
+                        if (a){
+                            indexValue[i]={
+                                'sub':maindata[i]['s']['value'],
+                                'pre':maindata[i]['p']['value'],
+                                'obj':maindata[i]['o']['value']
+                           }
+                        }
+                    }
+                    console.log(indexValue.length)
+                    $(indexValue).each(function (id,ele) {
+                    var nodes = new vis.DataSet([
+                        {id: ele['sub'], label: "Subject: " + ele['sub']},
+                        {id: ele['pre'], label: "Predicate: "+ele['pre']},
+                    ]);
+                    // create an array with edges
+                    var edges = new vis.DataSet([
+                        {from: ele['sub'], to: ele['pre']},
+                    ]);
+
+                    // create a network
+                    var container = document.getElementById('mynetwork');
+
+                    // provide the data in the vis format
+                    var data = {
+                        nodes: nodes,
+                        edges: edges
+                    };
+                    var options = {physics:{enabled:true}};
+
+                    // initialize your network!
+                    var network = new vis.Network(container, data, options);
+                    })
+//end function
+                    });
+            }
+        }
+    });
+
+</script>
+</html>
